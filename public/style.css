@@ -1,15 +1,57 @@
 .post {
-    padding: 20px 0;
+    padding: 20px;
+    border: 1px solid black;
+    margin: 10px;
+    box-shadow: 5px 5px 2px #888888;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 18px;
 }
 
 .btn-sm {
     margin: 5px 5px 5px 0;
+    /*float: right;*/
 }
 
 .btn-danger {
     margin: 5px 0 5px 10px;
+    /*float: right;*/
+    /*right: 30px;*/
 }
 
 .comments-container {
     display: none;
+}
+
+ul {
+    list-style-type: none;
+    /*position: relative;*/
+}
+
+.single-comment {
+    border: 0.5px dashed burlywood;
+    font-size: 14px;
+}
+
+.remove-comment {
+    right: 0px;
+}
+
+button.btn.btn-danger.remove-post {
+    display: inline;
+    float: right;
+    position: relative;
+    top: -22px;
+}
+
+li.comment {
+    margin: 10px;
+}
+
+button.btn.btn-sm.btn-danger.remove-comment {
+    float: right;
+    top: -10px;
+    position: relative;
+}
+.clear {
+    clear: both;
 }

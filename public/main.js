@@ -1,6 +1,11 @@
 var SpacebookApp = function () {
 
   var posts = [];
+  var showObj = {};
+
+  var showFunction = function (id) {
+
+  }
 
   var $posts = $(".posts");
 
@@ -37,9 +42,8 @@ var SpacebookApp = function () {
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(newComment),
       success: function (commentsData) {
-        posts[index].comments = [];
-        posts[index].comments = (commentsData);
-        _renderComments(index);
+        posts[index].comments = commentsData;
+        _renderComments(posts[index]._id);
       },
     });
   };
@@ -62,33 +66,45 @@ var SpacebookApp = function () {
       '/comments/' +
       posts[postIndex].comments[commentIndex]._id, {
         type: "DELETE",
-        success: function () {
-          posts[postIndex].comments.splice(commentIndex, 1);
-          _renderComments(postIndex);
+        success: function (commentsData) {
+          posts[postIndex].comments = commentsData;
+          _renderComments(posts[postIndex]._id);
         },
       });
   };
 
   function _renderPosts() {
+    // var $openPosts = $('.post .show').data('id');
+    // console.log($openPosts);
     $posts.empty();
+
     var source = $('#post-template').html();
     var template = Handlebars.compile(source);
     for (var i = 0; i < posts.length; i++) {
       var newHTML = template(posts[i]);
       $posts.append(newHTML);
-      _renderComments(i)
+      _renderComments(posts[i]._id)
     }
   }
 
-  function _renderComments(postIndex) {
-    var post = $(".post")[postIndex];
-    $commentsList = $(post).find('.comments-list')
+  function _renderComments(id) {
+    var $post = $(".post[data-id=" + id + "]");
+    $commentsList = $post.find('.comments-list')
     $commentsList.empty();
     var source = $('#comment-template').html();
     var template = Handlebars.compile(source);
-    for (var i = 0; i < posts[postIndex].comments.length; i++) {
-      var newHTML = template(posts[postIndex].comments[i]);
+    var post = _findPostById(id);
+    for (var i = 0; i < post.comments.length; i++) {
+      var newHTML = template(post.comments[i]);
       $commentsList.append(newHTML);
+    }
+  }
+
+  var _findPostById = function (id) {
+    for (var i = 0; i < posts.length; i += 1) {
+      if (posts[i]._id === id) {
+        return posts[i];
+      }
     }
   }
   return {
@@ -97,7 +113,8 @@ var SpacebookApp = function () {
     deleteComment: deleteComment,
     fetchPosts: fetchPosts,
     sendPost: sendPost,
-    _renderPosts: _renderPosts
+    _renderPosts: _renderPosts,
+    showFunction: showFunction
   };
 };
 
@@ -127,6 +144,7 @@ $posts.on('click', '.remove-post', function () {
 $posts.on('click', '.toggle-comments', function () {
   var $clickedPost = $(this).closest('.post');
   $clickedPost.find('.comments-container').toggleClass('show');
+
 });
 
 $posts.on('click', '.add-comment', function () {

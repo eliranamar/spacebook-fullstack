@@ -95,7 +95,7 @@ app.delete('/posts/:post_id/comments/:comment_id', function (req, res) {
     if (err) console.log(err);
     else {
       console.log(post);
-      res.send(post);
+      res.send(post.comments);
     }
   });
 })
