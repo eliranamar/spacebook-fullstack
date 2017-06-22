@@ -23,10 +23,14 @@ app.use(bodyParser.urlencoded({
 // 1) to handle getting all posts and their comments
 app.get('/posts', function (req, res) {
   Post.find(function (err, posts) {
-    console.log('==================================');
-    console.log(posts);
-    console.log('==================================');
-    res.json(posts);
+    if (err) console.log(err);
+    else {
+      console.log('==================================');
+      console.log('------FETCHING POSTS FROM DB------');
+      console.log('==================================');
+
+      res.json(posts);
+    }
   })
 })
 // 2) to handle adding a post
@@ -40,8 +44,6 @@ app.post('/posts', function (req, res) {
       console.log('----------POST SAVED!----------');
       console.log("+++++++++++++++++++++++++++++++");
     }
-
-
   });
   res.send(postToSave);
 })
@@ -59,11 +61,43 @@ app.delete('/posts/:_id', function (req, res) {
 })
 // 4) to handle adding a comment to a post
 app.post('/posts/:_id/comments', function (req, res) {
+  Post.findById(req.params._id, function (err, post) {
+    if (err) console.log(err);
+    else {
+      post.comments.push(req.body);
+      post.save(function () {
+
+        Post.findById(req.params._id, function (err, post) {
+          if (err) console.log(err);
+          else {
+            console.log("+++++++++++++++++++++++++++++++");
+            console.log('--------COMMENT SAVED!--------');
+            console.log("+++++++++++++++++++++++++++++++");
+            res.json(post.comments);
+          }
+        });
+      });
+    }
+  });
 
 })
 // 5) to handle deleting a comment from a post
-app.delete('deletecomment', function (req, res) {
-
+app.delete('/posts/:post_id/comments/:comment_id', function (req, res) {
+  Post.update({
+    _id: req.params.post_id
+  }, {
+    $pull: {
+      comments: {
+        _id: req.params.comment_id
+      }
+    }
+  }, function (err, post) {
+    if (err) console.log(err);
+    else {
+      console.log(post);
+      res.send(post);
+    }
+  });
 })
 
 app.listen(8000, function () {
