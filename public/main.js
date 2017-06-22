@@ -3,7 +3,6 @@ var SpacebookApp = function () {
   var posts = [];
 
   var $posts = $(".posts");
-  // _renderPosts();
 
   var fetchPosts = function () {
     $.ajax('/posts', {
@@ -32,18 +31,15 @@ var SpacebookApp = function () {
       },
     });
   }
-  var sendComment = function (newComment, postIndex) {
+  var sendComment = function (newComment, index) {
     $.ajax('/posts/' + posts[index]._id + '/comments/', {
-      type: "PUT",
+      type: "POST",
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify(newComment),
-      success: function (data) {
-        // console.log(data);
-        posts.push(data);
-        // console.log(posts);
-        posts[postIndex].comments.push(newComment);
-        _renderComments(postIndex);
-        _renderPosts();
+      success: function (commentsData) {
+        posts[index].comments = [];
+        posts[index].comments = (commentsData);
+        _renderComments(index);
       },
     });
   };
@@ -54,14 +50,24 @@ var SpacebookApp = function () {
     $.ajax('/posts/' + posts[index]._id, {
       type: "DELETE",
       success: function () {
-        // console.log(posts);
         posts.splice(index, 1);
-        // console.log(posts);
         _renderPosts();
       },
     });
   };
 
+  var deleteComment = function (postIndex, commentIndex) {
+    $.ajax('/posts/' +
+      posts[postIndex]._id +
+      '/comments/' +
+      posts[postIndex].comments[commentIndex]._id, {
+        type: "DELETE",
+        success: function () {
+          posts[postIndex].comments.splice(commentIndex, 1);
+          _renderComments(postIndex);
+        },
+      });
+  };
 
   function _renderPosts() {
     $posts.empty();
@@ -69,21 +75,10 @@ var SpacebookApp = function () {
     var template = Handlebars.compile(source);
     for (var i = 0; i < posts.length; i++) {
       var newHTML = template(posts[i]);
-      // console.log(newHTML);
       $posts.append(newHTML);
       _renderComments(i)
     }
   }
-
-  // function addPost(newPost) {
-  //   posts.push({
-  //     text: newPost,
-  //     comments: [],
-  //     test: ""
-  //   });
-  //   _renderPosts();
-  // }
-
 
   function _renderComments(postIndex) {
     var post = $(".post")[postIndex];
@@ -96,15 +91,6 @@ var SpacebookApp = function () {
       $commentsList.append(newHTML);
     }
   }
-
-
-
-
-  var deleteComment = function (postIndex, commentIndex) {
-    posts[postIndex].comments.splice(commentIndex, 1);
-    _renderComments(postIndex);
-  };
-
   return {
     deletePost: deletePost,
     sendComment: sendComment,
@@ -117,7 +103,6 @@ var SpacebookApp = function () {
 
 var app = SpacebookApp();
 
-
 $('#addpost').on('click', function () {
   var $input = $("#postText");
   if ($input.val() === "") {
@@ -127,7 +112,6 @@ $('#addpost').on('click', function () {
       "text": $input.val(),
       "comments": []
     }
-    // console.log(newPost);
     app.sendPost(newPost);
     $input.val("");
   }
@@ -177,4 +161,3 @@ $posts.on('click', '.remove-comment', function () {
 });
 
 app.fetchPosts();
-// app._renderPosts();
